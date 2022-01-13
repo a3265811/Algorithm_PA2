@@ -5,7 +5,8 @@
 #include <sstream>
 #include <queue>
 #include <set>
-#include <iomanip>
+#include <math.h>
+#include <algorithm>
 
 using namespace std;
 
@@ -29,9 +30,9 @@ public:
 	~router(){}
 
 	void parser(int argc, char*argv[]);
+	static	bool compare(net n1, net n2);
 	void route();
-	void shock(pair<int,int>&finder, pair<int,int>start);
-	void output();
+	void output(int argc, char*argv[]);
 private:
 	int grid_x;
 	int grid_y;

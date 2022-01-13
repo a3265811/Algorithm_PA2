@@ -19,8 +19,6 @@ void router::parser(int argc, char*argv[]){
 		stringstream ss;
 		ss << str;
 		ss >> temp_n.name >> temp_n.x1 >> temp_n.y1 >> temp_n.x2 >> temp_n.y2;
-/*		if (temp_x2 - temp_x1 > 0 && temp_y2 - temp_y1 > 0)
-			temp_n.order*/
 		nets.push_back(temp_n);
 	}
 	fin.close();
@@ -39,14 +37,19 @@ void router::parser(int argc, char*argv[]){
 	}
 }
 
+bool router::compare(net n1, net n2){
+	int MD1 = abs(n1.x2 - n1.x1) + abs(n1.y2 - n1.y1);
+	int MD2 = abs(n2.x2 - n2.x1) + abs(n2.y2 - n2.y1);
+	return MD1 > MD2;
+}
+
 void router::route(){
-	cout << "h_edge:" << "[" << h_edge.size() << "," << h_edge[0].size() << "]" << endl;
-	cout << "v_edge:" << "[" << v_edge.size() << "," << v_edge[0].size() << "]" << endl;
+	sort(nets.begin(),nets.end(),router::compare);
 	// BFS
 	queue<pair<int,int>> waiting;
 	for(int i = 0; i < nets.size(); i++){
-		//cout << "new route" << endl;
 		pair<int,int> start = pair<int,int>(nets[i].y1,nets[i].x1);
+		pair<int,int> target = pair<int,int>(nets[i].y2,nets[i].x2);
 		waiting.push(start);
 		vector<vector<node>> path;
 		for(int j = 0; j < grid_y; j++){
@@ -55,16 +58,10 @@ void router::route(){
 		}
 		path[start.first][start.second].distance = 0;
 		path[start.first][start.second].found = true;
-		int iter = 0;
-		int fill_count = 0;
 		while(!waiting.empty()){
-			//cout << "iter:" << iter << endl;
-			iter++;
 			pair<int,int> cur = waiting.front();
 			waiting.pop();
 			int counter = 0;
-		/*	cout << "cur:(" << cur.first << "," << cur.second << ")" << endl;
-			cout << v_edge[3][3] << endl;*/
 			if(cur.second - 1 >= 0 && !path[cur.first][cur.second-1].found){ // left grid search
 				if(h_edge[cur.first][cur.second-1] > 0){
 					waiting.push(pair<int,int>(cur.first, cur.second-1));
@@ -73,7 +70,6 @@ void router::route(){
 					path[cur.first][cur.second-1].predecessor = cur;
 					path[cur.first][cur.second-1].from_dir = 1;
 					counter++;
-					fill_count++;
 				}
 			}
 			if(cur.second + 1 < grid_x && !path[cur.first][cur.second+1].found){ // right grid search
@@ -84,7 +80,6 @@ void router::route(){
 					path[cur.first][cur.second+1].predecessor = cur;
 					path[cur.first][cur.second+1].from_dir = 0;
 					counter++;
-					fill_count++;
 				}
 			}
 			if(cur.first - 1 >= 0 && !path[cur.first-1][cur.second].found){ // up grid search
@@ -95,7 +90,6 @@ void router::route(){
 					path[cur.first-1][cur.second].predecessor = cur;
 					path[cur.first-1][cur.second].from_dir = 3;
 					counter++;
-					fill_count++;
 				}
 			}
 			if(cur.first + 1 < grid_y && !path[cur.first+1][cur.second].found){ // down grid search
@@ -106,14 +100,10 @@ void router::route(){
 					path[cur.first+1][cur.second].predecessor = cur;
 					path[cur.first+1][cur.second].from_dir = 2;
 					counter++;
-					fill_count++;
 				}
 			}
 
-			/*if(fill_count >= path.size() * path[0].size() -1)
-				break;*/
-
-			if(counter == 0 && cur == start){
+			if(counter == 0 && (cur == start || path[target.first][target.second].predecessor == pair<int,int>(-1,-1))){
 				waiting.push(cur);
 				if(0 <= cur.first && cur.first < h_edge.size() && 0 <= cur.second-1 && cur.second-1 < h_edge.size())
 					h_edge[cur.first][cur.second-1]++;
@@ -124,52 +114,10 @@ void router::route(){
 				if(0 <= cur.first && cur.first < v_edge.size() && 0 <= cur.second && cur.second < v_edge.size())
 					v_edge[cur.first][cur.second]++;
 			}
-/*			for(int j = 0; j < grid_y; j++){
-				for(int k = 0; k < grid_x; k++)
-					cout << setw(3) << path[j][k].distance << " ";
-				cout << endl;
-			}
-			cout << "BFS finished" << endl;
-			cout << "h_edge map:" << endl;
-			for(int j = 0; j < h_edge.size(); j++){
-				for(int k = 0; k < h_edge[j].size(); k++)
-					cout << setw(2) << h_edge[j][k] << " ";
-				cout << endl;
-			}
-			cout << "v_edge map:" << endl;
-			for(int j = 0; j < v_edge.size(); j++){
-				for(int k = 0; k < v_edge[j].size(); k++)
-					cout << setw(2) << v_edge[j][k] << " ";
-				cout << endl;
-			}*/
 		}
-		/*
-		for(int j = 0; j < grid_y; j++){
-			for(int k = 0; k < grid_x; k++)
-				cout << setw(3) << path[j][k].distance << " ";
-			cout << endl;
-		}
-		cout << "BFS finished" << endl;
-		cout << "h_edge map:" << endl;
-		for(int j = 0; j < h_edge.size(); j++){
-			for(int k = 0; k < h_edge[j].size(); k++)
-				cout << setw(2) << h_edge[j][k] << " ";
-			cout << endl;
-		}
-		cout << "v_edge map:" << endl;
-		for(int j = 0; j < v_edge.size(); j++){
-			for(int k = 0; k < v_edge[j].size(); k++)
-				cout << setw(2) << v_edge[j][k] << " ";
-			cout << endl;
-		}*/
-		cout << "i = " << i << endl;
 
 		//backtrace ver 2
-		pair<int,int> finder = pair<int,int>(nets[i].y2,nets[i].x2);
-		if(i == 6342){
-			cout << "start:" << start.first << "," << start.second << endl;
-			cout << "finder:" << finder.first << "," << finder.second << endl;
-		}
+		pair<int,int> finder = target;
 		while(finder != start){
 			int dir = path[finder.first][finder.second].from_dir;
 			if(dir == 0){ //left track
@@ -200,16 +148,9 @@ void router::route(){
 					finder = path[finder.first][finder.second].predecessor;
 				}
 			}
-			if(i == 6342){
-				cout << "dir:" << dir << endl;
-				cout << "finder:" << finder.first << "," << finder.second << endl;
-				int kk;
-				cin >> kk;
-			}
 		}
 		nets[i].road.push_back(pair<int,int>(nets[i].x1,nets[i].y1));
-//		cout << "---------------------------------" << endl;
-		
+
 	/*	
 		//backtrace ver1
 		pair<int,int> finder = pair<int,int>(nets[i].y2,nets[i].x2);
@@ -351,16 +292,23 @@ void router::route(){
 	}
 }
 
-void router::shock(pair<int,int>&finder, pair<int,int>start){
-	
-
-}
-
-void router::output(){
+void router::output(int argc, char*argv[]){
+	fstream fout;
+	fout.open(argv[2],ios::out);
+	if(!fout){
+		cout << "Can't open file:" << argv[2] << endl;
+		return;
+	}
+	int counter = 0;
 	for(int i = 0; i < nets.size(); i++){
-		cout << nets[i].name << " " << nets[i].road.size()-1 << endl;
-		for(int j = 0; j < nets[i].road.size()-1; j++){
-			cout << nets[i].road[j].first << " " << nets[i].road[j].second << " " << nets[i].road[j+1].first << " " << nets[i].road[j+1].second << endl;
+		fout << nets[i].name << " " << nets[i].road.size()-1 << endl;
+		for(int j = nets[i].road.size()-1; j > 0; j--){
+			fout << nets[i].road[j].first << " " << nets[i].road[j].second << " " << nets[i].road[j-1].first << " " << nets[i].road[j-1].second << endl;
+		}
+		if(nets[i].road.size() == 0){
+			counter++;
 		}
 	}
+	if(counter != 0)
+		cout << "miss connection" << endl;
 }
