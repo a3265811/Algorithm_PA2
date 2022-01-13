@@ -4,6 +4,8 @@
 #include <fstream>
 #include <sstream>
 #include <queue>
+#include <set>
+#include <iomanip>
 
 using namespace std;
 
@@ -19,7 +21,6 @@ private:
 	int x2;
 	int y2;
 	vector<pair<int,int>> road;
-	vector<int> order;
 };
 
 class router{
@@ -29,7 +30,7 @@ public:
 
 	void parser(int argc, char*argv[]);
 	void route();
-	void backtrace();
+	void shock(pair<int,int>&finder, pair<int,int>start);
 	void output();
 private:
 	int grid_x;
@@ -45,6 +46,8 @@ public:
 	node(){
 		distance = -1;
 		found = false;
+		predecessor = pair<int,int>(-1,-1);
+		int from_dir = -1;
 	}
 	~node(){}
 
@@ -52,4 +55,6 @@ public:
 private:
 	int distance;
 	bool found;
+	pair<int,int> predecessor;
+	int from_dir;
 };

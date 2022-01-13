@@ -55,16 +55,12 @@ void router::route(){
 		}
 		path[start.first][start.second].distance = 0;
 		path[start.first][start.second].found = true;
-		int iter = 0;
-		int fill_count = 0;
 		while(!waiting.empty()){
-			//cout << "iter:" << iter << endl;
-			iter++;
 			pair<int,int> cur = waiting.front();
 			waiting.pop();
 			int counter = 0;
-		/*	cout << "cur:(" << cur.first << "," << cur.second << ")" << endl;
-			cout << v_edge[3][3] << endl;*/
+			cout << "cur:(" << cur.first << "," << cur.second << ")" << endl;
+			cout << v_edge[3][3] << endl;
 			if(cur.second - 1 >= 0 && !path[cur.first][cur.second-1].found){ // left grid search
 				if(h_edge[cur.first][cur.second-1] > 0){
 					waiting.push(pair<int,int>(cur.first, cur.second-1));
@@ -73,7 +69,6 @@ void router::route(){
 					path[cur.first][cur.second-1].predecessor = cur;
 					path[cur.first][cur.second-1].from_dir = 1;
 					counter++;
-					fill_count++;
 				}
 			}
 			if(cur.second + 1 < grid_x && !path[cur.first][cur.second+1].found){ // right grid search
@@ -84,7 +79,6 @@ void router::route(){
 					path[cur.first][cur.second+1].predecessor = cur;
 					path[cur.first][cur.second+1].from_dir = 0;
 					counter++;
-					fill_count++;
 				}
 			}
 			if(cur.first - 1 >= 0 && !path[cur.first-1][cur.second].found){ // up grid search
@@ -95,7 +89,6 @@ void router::route(){
 					path[cur.first-1][cur.second].predecessor = cur;
 					path[cur.first-1][cur.second].from_dir = 3;
 					counter++;
-					fill_count++;
 				}
 			}
 			if(cur.first + 1 < grid_y && !path[cur.first+1][cur.second].found){ // down grid search
@@ -106,13 +99,8 @@ void router::route(){
 					path[cur.first+1][cur.second].predecessor = cur;
 					path[cur.first+1][cur.second].from_dir = 2;
 					counter++;
-					fill_count++;
 				}
 			}
-
-			/*if(fill_count >= path.size() * path[0].size() -1)
-				break;*/
-
 			if(counter == 0 && cur == start){
 				waiting.push(cur);
 				if(0 <= cur.first && cur.first < h_edge.size() && 0 <= cur.second-1 && cur.second-1 < h_edge.size())
@@ -124,29 +112,10 @@ void router::route(){
 				if(0 <= cur.first && cur.first < v_edge.size() && 0 <= cur.second && cur.second < v_edge.size())
 					v_edge[cur.first][cur.second]++;
 			}
-/*			for(int j = 0; j < grid_y; j++){
-				for(int k = 0; k < grid_x; k++)
-					cout << setw(3) << path[j][k].distance << " ";
-				cout << endl;
-			}
-			cout << "BFS finished" << endl;
-			cout << "h_edge map:" << endl;
-			for(int j = 0; j < h_edge.size(); j++){
-				for(int k = 0; k < h_edge[j].size(); k++)
-					cout << setw(2) << h_edge[j][k] << " ";
-				cout << endl;
-			}
-			cout << "v_edge map:" << endl;
-			for(int j = 0; j < v_edge.size(); j++){
-				for(int k = 0; k < v_edge[j].size(); k++)
-					cout << setw(2) << v_edge[j][k] << " ";
-				cout << endl;
-			}*/
 		}
-		/*
 		for(int j = 0; j < grid_y; j++){
 			for(int k = 0; k < grid_x; k++)
-				cout << setw(3) << path[j][k].distance << " ";
+				cout << setw(4) << path[j][k].distance << " ";
 			cout << endl;
 		}
 		cout << "BFS finished" << endl;
@@ -161,15 +130,10 @@ void router::route(){
 			for(int k = 0; k < v_edge[j].size(); k++)
 				cout << setw(2) << v_edge[j][k] << " ";
 			cout << endl;
-		}*/
-		cout << "i = " << i << endl;
+		}
 
 		//backtrace ver 2
 		pair<int,int> finder = pair<int,int>(nets[i].y2,nets[i].x2);
-		if(i == 6342){
-			cout << "start:" << start.first << "," << start.second << endl;
-			cout << "finder:" << finder.first << "," << finder.second << endl;
-		}
 		while(finder != start){
 			int dir = path[finder.first][finder.second].from_dir;
 			if(dir == 0){ //left track
@@ -200,15 +164,9 @@ void router::route(){
 					finder = path[finder.first][finder.second].predecessor;
 				}
 			}
-			if(i == 6342){
-				cout << "dir:" << dir << endl;
-				cout << "finder:" << finder.first << "," << finder.second << endl;
-				int kk;
-				cin >> kk;
-			}
 		}
 		nets[i].road.push_back(pair<int,int>(nets[i].x1,nets[i].y1));
-//		cout << "---------------------------------" << endl;
+		cout << "---------------------------------" << endl;
 		
 	/*	
 		//backtrace ver1
@@ -360,7 +318,7 @@ void router::output(){
 	for(int i = 0; i < nets.size(); i++){
 		cout << nets[i].name << " " << nets[i].road.size()-1 << endl;
 		for(int j = 0; j < nets[i].road.size()-1; j++){
-			cout << nets[i].road[j].first << " " << nets[i].road[j].second << " " << nets[i].road[j+1].first << " " << nets[i].road[j+1].second << endl;
+			cout << nets[i].road[j].first << nets[i].road[j].second << nets[i].road[j+1].first << nets[i].road[j+1].second << endl;
 		}
 	}
 }
